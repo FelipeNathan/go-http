@@ -11,7 +11,6 @@ var (
 	insecure bool
 	url      string
 	method   string
-	client   *httpclient.HttpClient
 )
 
 func main() {
@@ -25,8 +24,7 @@ func main() {
 }
 
 func makeRequest() {
-	var err error
-	client, err = httpclient.NewHttpClient(insecure)
+	client, err := httpclient.NewHttpClient(insecure)
 	if err != nil {
 		panic(err)
 	}
