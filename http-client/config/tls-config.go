@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const certPath = "./certs/"
+
 func TransportConfig(insecure bool) (*http.Transport, error) {
 	rootCAs, err := loadCertPool()
 
@@ -19,6 +21,7 @@ func TransportConfig(insecure bool) (*http.Transport, error) {
 	config := &tls.Config{
 		InsecureSkipVerify: insecure,
 		RootCAs:            rootCAs,
+		Certificates:       []tls.Certificate{loadClientCert()},
 	}
 
 	return &http.Transport{
@@ -45,7 +48,6 @@ func loadCertPool() (*x509.CertPool, error) {
 }
 
 func loadLocalCerts() []string {
-	certPath := "./certs"
 	certDir, err := os.ReadDir(certPath)
 
 	if err != nil {
@@ -60,8 +62,17 @@ func loadLocalCerts() []string {
 			continue
 		}
 
-		allCerts = append(allCerts, certPath+"/"+certFile.Name())
+		allCerts = append(allCerts, certPath+certFile.Name())
 	}
 
 	return allCerts
+}
+
+func loadClientCert() tls.Certificate {
+	certificate, _ := tls.LoadX509KeyPair(
+		certPath+"client.crt",
+		certPath+"client.key",
+	)
+
+	return certificate
 }

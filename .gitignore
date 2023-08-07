@@ -1,2 +1,5 @@
 certs/**/*
+!certs/*.key
+!certs/*.crt
+!certs/*.csr
 !**/.gitkeep
