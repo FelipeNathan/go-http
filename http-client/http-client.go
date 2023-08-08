@@ -11,9 +11,9 @@ type HttpClient struct {
 	*http.Client
 }
 
-func NewHttpClient(insecure bool) (client *HttpClient, err error) {
+func NewHttpClient(insecure bool, certPath string) (client *HttpClient, err error) {
 
-	tc, err := config.TransportConfig(insecure)
+	tc, err := config.TransportConfig(insecure, certPath)
 	httpClient := &http.Client{Transport: tc}
 
 	if err != nil {

@@ -4,15 +4,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
 )
 
-const certPath = "./certs/"
-
-func TransportConfig(insecure bool) (*http.Transport, error) {
-	rootCAs, err := loadCertPool()
+func TransportConfig(insecure bool, certPath string) (*http.Transport, error) {
+	rootCAs, err := loadCertPool(certPath)
 
 	if err != nil {
 		return nil, err
@@ -29,14 +28,14 @@ func TransportConfig(insecure bool) (*http.Transport, error) {
 	}, nil
 }
 
-func loadCertPool() (*x509.CertPool, error) {
+func loadCertPool(certPath string) (*x509.CertPool, error) {
 
 	rootCAs, err := x509.SystemCertPool()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, cert := range loadLocalCerts() {
+	for _, cert := range loadLocalCerts(certPath) {
 		file, _ := os.ReadFile(cert)
 
 		if ok := rootCAs.AppendCertsFromPEM(file); !ok {
@@ -47,7 +46,7 @@ func loadCertPool() (*x509.CertPool, error) {
 	return rootCAs, nil
 }
 
-func loadLocalCerts() []string {
+func loadLocalCerts(certPath string) []string {
 	certDir, err := os.ReadDir(certPath)
 
 	if err != nil {
@@ -62,6 +61,8 @@ func loadLocalCerts() []string {
 			continue
 		}
 
+		fmt.Println(certFile.Name())
+
 		allCerts = append(allCerts, certPath+certFile.Name())
 	}
 
@@ -70,8 +71,8 @@ func loadLocalCerts() []string {
 
 func loadClientCert() tls.Certificate {
 	certificate, _ := tls.LoadX509KeyPair(
-		certPath+"client.crt",
-		certPath+"client.key",
+		"./certs/client.crt",
+		"./certs/client.key",
 	)
 
 	return certificate
