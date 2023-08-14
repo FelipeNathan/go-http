@@ -60,11 +60,15 @@ func withReaders(options []metricSdk.Option) []metricSdk.Option {
 	); err == nil {
 		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(otlpExporter, fiveSeconds))
 		options = append(options, r)
+	} else {
+		panic(err)
 	}
 
 	if stdOutExporter, err := stdoutmetric.New(); err == nil {
 		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(stdOutExporter, fiveSeconds))
 		options = append(options, r)
+	} else {
+		panic(err)
 	}
 
 	return options
