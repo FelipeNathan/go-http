@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  grafana: #user: admin, password: admin
+    image: grafana/grafana:9.5.1
+    platform: linux/x86_64
+    ports:
+      - 3000:3000
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+    volumes:
+      - grafana:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    configs:
+      - source: prometheus
+        target: /etc/prometheus/prometheus.yml
+    depends_on:
+      otel-collector:
+        condition: service_started
+        
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+    configs:
+      - source: otel-collector
+        target: /etc/otelcol-contrib/config.yaml
+
+configs:
+  prometheus:
+    file: ./prometheus/prometheus.yaml
+  otel-collector:
+    file: ./opentelemetry/config.yaml
+
+volumes:
+  grafana:

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"strings"
+	"net/http"
 
 	httpclient "github.com/FelipeNathan/go-http/http-client"
+	"github.com/FelipeNathan/go-http/metric"
 )
 
 var (
@@ -17,17 +17,27 @@ var (
 
 func main() {
 
-	flag.BoolVar(&insecure, "insecure", false, "Ignore TLS validation")
-	flag.StringVar(&url, "url", "", "Url to make the request")
-	flag.StringVar(&method, "method", "GET", "Http method")
-	flag.StringVar(&certPath, "certPath", "./certs/", "Path of pem certificates to trust")
-	flag.Parse()
+	metric.Config()
+	defer metric.Shutdown()
 
-	if !strings.HasSuffix(certPath, "/") {
-		certPath += "/"
-	}
+	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		metric.Count()
+		w.Write([]byte("Working"))
+	})
 
-	makeRequest()
+	http.ListenAndServe(":8080", nil)
+
+	// flag.BoolVar(&insecure, "insecure", false, "Ignore TLS validation")
+	// flag.StringVar(&url, "url", "", "Url to make the request")
+	// flag.StringVar(&method, "method", "GET", "Http method")
+	// flag.StringVar(&certPath, "certPath", "./certs/", "Path of pem certificates to trust")
+	// flag.Parse()
+
+	// if !strings.HasSuffix(certPath, "/") {
+	// 	certPath += "/"
+	// }
+
+	// makeRequest()
 }
 
 func makeRequest() {
