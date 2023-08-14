@@ -21,32 +21,11 @@ const (
 
 func Config() {
 
-	resources := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("my_service"),
-		semconv.ServiceVersionKey.String("v0.0.0"),
-	)
+	var options []metricSdk.Option
+	options = withResource(options)
+	options = withReaders(options)
 
-	otlpExporter, err := otlpmetrichttp.New(
-		context.Background(),
-		otlpmetrichttp.WithEndpoint("localhost:4318"),
-		otlpmetrichttp.WithInsecure(),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	stdOutExporter, err := stdoutmetric.New()
-	if err != nil {
-		panic(err)
-	}
-
-	fiveSeconds := metricSdk.WithInterval(time.Second * 5)
-	mp := metricSdk.NewMeterProvider(
-		metricSdk.WithResource(resources),
-		metricSdk.WithReader(metricSdk.NewPeriodicReader(otlpExporter, fiveSeconds)),
-		metricSdk.WithReader(metricSdk.NewPeriodicReader(stdOutExporter, fiveSeconds)),
-	)
+	mp := metricSdk.NewMeterProvider(options...)
 
 	otel.SetMeterProvider(mp)
 }
@@ -59,4 +38,34 @@ func Shutdown() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func withResource(options []metricSdk.Option) []metricSdk.Option {
+	resources := resource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceNameKey.String("my_service"),
+		semconv.ServiceVersionKey.String("v0.0.0"),
+	)
+
+	return append(options, metricSdk.WithResource(resources))
+}
+
+func withReaders(options []metricSdk.Option) []metricSdk.Option {
+	fiveSeconds := metricSdk.WithInterval(time.Second * 5)
+
+	if otlpExporter, err := otlpmetrichttp.New(
+		context.Background(),
+		otlpmetrichttp.WithEndpoint("localhost:4318"),
+		otlpmetrichttp.WithInsecure(),
+	); err == nil {
+		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(otlpExporter, fiveSeconds))
+		options = append(options, r)
+	}
+
+	if stdOutExporter, err := stdoutmetric.New(); err == nil {
+		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(stdOutExporter, fiveSeconds))
+		options = append(options, r)
+	}
+
+	return options
 }
