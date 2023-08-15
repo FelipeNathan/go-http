@@ -2,7 +2,6 @@ package metric
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 
 	"go.opentelemetry.io/otel"
@@ -55,7 +54,6 @@ func Gauge() {
 			gaugeName,
 			metric.WithDescription("Status of Providers"),
 			metric.WithInt64Callback(func(ctx context.Context, io metric.Int64Observer) error {
-				fmt.Printf("%v - %v\n", index, provider)
 				io.Observe(index, metric.WithAttributes(attr...))
 				return nil
 			}),
