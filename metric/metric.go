@@ -59,18 +59,18 @@ func withReaders(options meterOptions) meterOptions {
 		context.Background(),
 		otlpmetrichttp.WithEndpoint("localhost:4318"),
 		otlpmetrichttp.WithInsecure(),
-	); err == nil {
+	); err != nil {
+		panic(err)
+	} else {
 		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(otlpExporter, fiveSeconds))
 		options = append(options, r)
-	} else {
-		panic(err)
 	}
 
-	if stdOutExporter, err := stdoutmetric.New(); err == nil {
+	if stdOutExporter, err := stdoutmetric.New(); err != nil {
+		panic(err)
+	} else {
 		r := metricSdk.WithReader(metricSdk.NewPeriodicReader(stdOutExporter, fiveSeconds))
 		options = append(options, r)
-	} else {
-		panic(err)
 	}
 
 	return options
