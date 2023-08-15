@@ -23,9 +23,9 @@ type meterOptions []metricSdk.Option
 
 func Config() {
 
-	var options meterOptions
-	options = withResource(options)
-	options = withReaders(options)
+	options := meterOptions{}.
+		withResource().
+		withReaders()
 
 	mp := metricSdk.NewMeterProvider(options...)
 
@@ -42,7 +42,7 @@ func Shutdown() {
 	}
 }
 
-func withResource(options meterOptions) meterOptions {
+func (options meterOptions) withResource() meterOptions {
 	resources := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.ServiceNameKey.String("my_service"),
@@ -52,7 +52,7 @@ func withResource(options meterOptions) meterOptions {
 	return append(options, metricSdk.WithResource(resources))
 }
 
-func withReaders(options meterOptions) meterOptions {
+func (options meterOptions) withReaders() meterOptions {
 	fiveSeconds := metricSdk.WithInterval(time.Second * 5)
 
 	if otlpExporter, err := otlpmetrichttp.New(
