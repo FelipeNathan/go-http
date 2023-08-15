@@ -23,6 +23,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		metric.Count()
 		metric.Gauge()
+		metric.Histogram()
 		w.Write([]byte("Working"))
 	})
 

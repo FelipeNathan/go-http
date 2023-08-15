@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	metricName = "provider_status_manager_of_provider_request_total"
-	gaugeName  = "provider_status_manager_of_provider_current_status"
+	metricName    = "provider_status_manager_of_provider_request_total"
+	gaugeName     = "provider_status_manager_of_provider_current_latency_request"
+	histogramName = "provider_status_manager_of_provider_latency_request"
 )
-
-var status = []string{"DISABLED", "TEMPORARILY_UNAVAILABLE", "ENABLED"}
 
 type kv []attribute.KeyValue
 
@@ -41,7 +40,7 @@ func Count() {
 }
 
 func Gauge() {
-	index, _ := randomStatus()
+	latency := randomLatency()
 	provider := randomProvider()
 
 	attr := kv{
@@ -54,7 +53,7 @@ func Gauge() {
 			gaugeName,
 			metric.WithDescription("Status of Providers"),
 			metric.WithInt64Callback(func(ctx context.Context, io metric.Int64Observer) error {
-				io.Observe(index, metric.WithAttributes(attr...))
+				io.Observe(latency, metric.WithAttributes(attr...))
 				return nil
 			}),
 		)
@@ -62,6 +61,22 @@ func Gauge() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func Histogram() {
+	histo, err := otel.GetMeterProvider().
+		Meter(meterName).
+		Int64Histogram(histogramName, metric.WithDescription("Latency of the providers requests"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	attr := kv{
+		attribute.Int("providerId", randomProvider()),
+	}
+
+	histo.Record(context.Background(), randomLatency(), metric.WithAttributes(attr...))
 }
 
 func randomProvider() int {
@@ -74,7 +89,7 @@ func randomStatusCode() int {
 	return codes[rand.Intn(len(codes))]
 }
 
-func randomStatus() (int64, string) {
-	index := rand.Intn(len(status))
-	return int64(index), status[index]
+func randomLatency() int64 {
+	ls := []int64{30, 60, 500, 700, 1200}
+	return ls[rand.Intn(len(ls))]
 }
