@@ -19,9 +19,11 @@ const (
 	meterName = "github.com/FelipeNathan/go-http"
 )
 
+type meterOptions []metricSdk.Option
+
 func Config() {
 
-	var options []metricSdk.Option
+	var options meterOptions
 	options = withResource(options)
 	options = withReaders(options)
 
@@ -40,7 +42,7 @@ func Shutdown() {
 	}
 }
 
-func withResource(options []metricSdk.Option) []metricSdk.Option {
+func withResource(options meterOptions) meterOptions {
 	resources := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.ServiceNameKey.String("my_service"),
@@ -50,7 +52,7 @@ func withResource(options []metricSdk.Option) []metricSdk.Option {
 	return append(options, metricSdk.WithResource(resources))
 }
 
-func withReaders(options []metricSdk.Option) []metricSdk.Option {
+func withReaders(options meterOptions) meterOptions {
 	fiveSeconds := metricSdk.WithInterval(time.Second * 5)
 
 	if otlpExporter, err := otlpmetrichttp.New(
