@@ -4,6 +4,8 @@ go 1.20
 
 require go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v0.39.0
 
+require github.com/go-chi/chi/v5 v5.0.10 // indirect
+
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect

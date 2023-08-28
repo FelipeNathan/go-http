@@ -1,0 +1,24 @@
+<html>
+    <head></head>
+    <body>
+        <label for="url">Url</label>
+        <input type="text" name="url" id="url"/>
+        <br/>
+        <input type="button" value="Send" onclick="send()"/>
+        <br/>
+        <span id="response"></span>
+    </body>
+    <script>
+        function send() {
+            const url = document.getElementById("url").value;
+            fetch("/", {
+                method: "POST",
+                headers: {
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({url})
+            }).then(resp => resp.text())
+            .then(text => document.getElementById("response").innerHTML = text)
+        }
+    </script>
+</html>

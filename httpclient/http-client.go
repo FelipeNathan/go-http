@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/FelipeNathan/go-http/http-client/config"
+	"github.com/FelipeNathan/go-http/httpclient/config"
 )
 
 type HttpClient struct {
