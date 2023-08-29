@@ -46,16 +46,19 @@ func (c *HttpClient) doRequest(method string, url string) string {
 
 	now := time.Now()
 	res, err := c.Do(req)
-	latency := time.Since(now)
-
 	if err != nil {
 		panic(err)
 	}
 
-	metric.Count(url, res.StatusCode)
-	metric.Gauge(url, latency.Milliseconds())
-	metric.Histogram(url, latency.Milliseconds())
+	saveMetrics(now, url, res)
 
 	body, _ := io.ReadAll(res.Body)
 	return string(body)
+}
+
+func saveMetrics(start time.Time, url string, res *http.Response) {
+	latency := time.Since(start)
+	metric.Count(url, res.StatusCode)
+	metric.Gauge(url, latency.Milliseconds())
+	metric.Histogram(url, latency.Milliseconds())
 }
