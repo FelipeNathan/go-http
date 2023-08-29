@@ -10,8 +10,9 @@ import (
 
 	"github.com/FelipeNathan/go-http/httpclient"
 	"github.com/FelipeNathan/go-http/metric"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog"
 )
 
 var (
@@ -20,6 +21,7 @@ var (
 	method   string
 	certPath string
 	serve    bool
+	client   *httpclient.HttpClient
 )
 
 type payload struct {
@@ -39,26 +41,24 @@ func main() {
 		certPath += "/"
 	}
 
+	var err error
+	client, err = httpclient.NewHttpClient(insecure, certPath)
+	if err != nil {
+		panic(err)
+	}
+
 	metric.Config()
 	defer metric.Shutdown()
 
 	if serve {
 		httpServer()
 	} else {
-		makeRequest()
+		res := makeRequest()
+		fmt.Println(res)
 	}
 }
 
 func makeRequest() string {
-	metric.Count()
-	metric.Gauge()
-	metric.Histogram()
-
-	client, err := httpclient.NewHttpClient(insecure, certPath)
-	if err != nil {
-		panic(err)
-	}
-
 	var res string
 	switch method {
 	case "POST":
@@ -66,13 +66,12 @@ func makeRequest() string {
 	default:
 		res = client.Get(url)
 	}
-
-	fmt.Println(res)
 	return res
 }
 
 func httpServer() {
 	r := chi.NewRouter()
+	// useLogger(r)
 	r.Use(middleware.Logger)
 
 	r.Get("/", func(w http.ResponseWriter, req *http.Request) {
@@ -98,4 +97,11 @@ func httpServer() {
 	})
 
 	http.ListenAndServe(":8080", r)
+}
+
+func useLogger(r *chi.Mux) {
+	logger := httplog.NewLogger("go-http", httplog.Options{
+		JSON: true,
+	})
+	r.Use(httplog.RequestLogger(logger))
 }
