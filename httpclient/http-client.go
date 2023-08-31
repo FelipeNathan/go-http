@@ -3,8 +3,10 @@ package httpclient
 import (
 	"io"
 	"net/http"
+	"time"
 
-	"github.com/FelipeNathan/go-http/http-client/config"
+	"github.com/FelipeNathan/go-http/httpclient/config"
+	"github.com/FelipeNathan/go-http/metric"
 )
 
 type HttpClient struct {
@@ -38,17 +40,25 @@ func (c *HttpClient) Get(url string) string {
 
 func (c *HttpClient) doRequest(method string, url string) string {
 	req, err := http.NewRequest(method, url, nil)
-
 	if err != nil {
 		panic(err)
 	}
 
+	now := time.Now()
 	res, err := c.Do(req)
-
 	if err != nil {
 		panic(err)
 	}
+
+	saveMetrics(now, url, res)
 
 	body, _ := io.ReadAll(res.Body)
 	return string(body)
+}
+
+func saveMetrics(start time.Time, url string, res *http.Response) {
+	latency := time.Since(start)
+	metric.Count(url, res.StatusCode)
+	metric.Gauge(url, latency.Milliseconds())
+	metric.Histogram(url, latency.Milliseconds())
 }
