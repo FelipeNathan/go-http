@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog"
 	"github.com/rs/zerolog"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
@@ -43,8 +44,9 @@ func httpServer() {
 	r.Use(middleware.Logger)
 
 	controller.CertPath = certPath
-	r.Get("/", controller.Index)
-	r.Post("/", controller.Post)
+
+	addRoute(r, http.MethodGet, "/", controller.Index)
+	addRoute(r, http.MethodPost, "/", controller.Post)
 
 	fmt.Print("Listening")
 	http.ListenAndServe(":8080", r)
@@ -54,4 +56,8 @@ func getLogger() zerolog.Logger {
 	return httplog.NewLogger("go-http", httplog.Options{
 		JSON: false,
 	})
+}
+
+func addRoute(r *chi.Mux, method, route string, handler func(w http.ResponseWriter, req *http.Request)) {
+	r.Method(method, route, otelhttp.NewHandler(http.HandlerFunc(handler), route))
 }

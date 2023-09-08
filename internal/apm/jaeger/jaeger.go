@@ -3,13 +3,12 @@ package jaeger
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/FelipeNathan/go-http/internal"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
@@ -40,9 +39,10 @@ func Shutdown() {
 }
 
 func newExporter() *otlptrace.Exporter {
-	client := otlptracegrpc.NewClient(
-		otlptracegrpc.WithEndpoint("localhost:4319"),
-		otlptracegrpc.WithInsecure(),
+
+	client := otlptracehttp.NewClient(
+		otlptracehttp.WithEndpoint("localhost:4320"),
+		otlptracehttp.WithInsecure(),
 	)
 
 	if exporter, err := otlptrace.New(context.Background(), client); err != nil {
@@ -50,10 +50,6 @@ func newExporter() *otlptrace.Exporter {
 	} else {
 		return exporter
 	}
-}
-
-func TraceReq(ctx context.Context, req *http.Request, attr ...attribute.KeyValue) (context.Context, trace.Span) {
-	return Trace(ctx, fmt.Sprintf("[%s] %s", req.Method, req.RequestURI))
 }
 
 func Trace(ctx context.Context, spanName string, attr ...attribute.KeyValue) (context.Context, trace.Span) {

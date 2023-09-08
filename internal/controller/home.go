@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/FelipeNathan/go-http/internal/apm/jaeger"
 	"github.com/FelipeNathan/go-http/internal/httpclient"
 )
 
@@ -19,10 +18,6 @@ type payload struct {
 }
 
 func Index(w http.ResponseWriter, req *http.Request) {
-
-	_, span := jaeger.TraceReq(req.Context(), req)
-	defer span.End()
-
 	template, err := template.ParseFiles("./web/html/index.html")
 
 	if err != nil {
@@ -33,10 +28,6 @@ func Index(w http.ResponseWriter, req *http.Request) {
 }
 
 func Post(w http.ResponseWriter, req *http.Request) {
-
-	ctx, span := jaeger.TraceReq(req.Context(), req)
-	defer span.End()
-
 	p := &payload{}
 	err := json.NewDecoder(req.Body).Decode(p)
 
@@ -44,7 +35,7 @@ func Post(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	response := makeRequest(ctx, *p)
+	response := makeRequest(req.Context(), *p)
 
 	w.Header().Add("Content-Type", "text/html")
 	template.HTMLEscape(w, []byte(response))
