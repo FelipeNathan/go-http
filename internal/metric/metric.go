@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/FelipeNathan/go-http/internal"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	metricSdk "go.opentelemetry.io/otel/sdk/metric"
@@ -44,7 +45,7 @@ func Shutdown() {
 func (options meterOptions) withResource() meterOptions {
 	resources := resource.NewWithAttributes(
 		semconv.SchemaURL,
-		semconv.ServiceNameKey.String("my_service"),
+		semconv.ServiceNameKey.String(internal.AppName),
 		semconv.ServiceVersionKey.String("v0.0.0"),
 	)
 

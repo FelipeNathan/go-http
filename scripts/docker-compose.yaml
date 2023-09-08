@@ -39,6 +39,13 @@ services:
       - source: otel-collector
         target: /etc/otelcol-contrib/config.yaml
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.49
+    ports:
+      - 4319:4317 # OTLP gRPC receiver
+      - 4320:4318 # OTLP http receiver
+      - 16686:16686 # UI
+
 configs:
   prometheus:
     file: ./prometheus/prometheus.yaml

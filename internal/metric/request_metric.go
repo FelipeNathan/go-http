@@ -17,7 +17,7 @@ const (
 type kv []attribute.KeyValue
 
 func Count(url string, statusCode int) {
-	counter, err := otel.GetMeterProvider().
+	counter, err := otel.
 		Meter(meterName).
 		Int64Counter(metricName, metric.WithDescription("Url Requests"))
 
@@ -43,7 +43,7 @@ func Gauge(url string, latency int64) {
 		attribute.String("url", url),
 	}
 
-	_, err := otel.GetMeterProvider().
+	_, err := otel.
 		Meter(meterName).
 		Int64ObservableGauge(
 			gaugeName,
@@ -60,7 +60,7 @@ func Gauge(url string, latency int64) {
 }
 
 func Histogram(url string, latency int64) {
-	histo, err := otel.GetMeterProvider().
+	histo, err := otel.
 		Meter(meterName).
 		Int64Histogram(histogramName, metric.WithDescription("Latency of the providers requests"))
 

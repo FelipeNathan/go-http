@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/FelipeNathan/go-http/internal/apm/jaeger"
 	"github.com/FelipeNathan/go-http/internal/controller"
 	"github.com/FelipeNathan/go-http/internal/metric"
 	"github.com/go-chi/chi/middleware"
@@ -29,6 +30,10 @@ func main() {
 
 	metric.Config()
 	defer metric.Shutdown()
+
+	jaeger.Config()
+	defer jaeger.Shutdown()
+
 	httpServer()
 }
 
