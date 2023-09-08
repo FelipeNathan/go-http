@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/FelipeNathan/go-http/internal/httpclient"
+	"github.com/FelipeNathan/go-http/internal/metric"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog"
@@ -33,25 +34,9 @@ func main() {
 		certPath += "/"
 	}
 
-	// metric.Config()
-	// defer metric.Shutdown()
+	metric.Config()
+	defer metric.Shutdown()
 	httpServer()
-}
-
-func makeRequest(p payload) string {
-	client, err := httpclient.NewHttpClient(p.Insecure, certPath)
-	if err != nil {
-		panic(err)
-	}
-
-	var res string
-	switch p.Method {
-	case "POST":
-		res = client.Post(p.Url)
-	default:
-		res = client.Get(p.Url)
-	}
-	return res
 }
 
 func httpServer() {
@@ -93,4 +78,20 @@ func useLogger(r *chi.Mux) {
 		JSON: false,
 	})
 	r.Use(httplog.RequestLogger(logger))
+}
+
+func makeRequest(p payload) string {
+	client, err := httpclient.NewHttpClient(p.Insecure, certPath)
+	if err != nil {
+		panic(err)
+	}
+
+	var res string
+	switch p.Method {
+	case "POST":
+		res = client.Post(p.Url)
+	default:
+		res = client.Get(p.Url)
+	}
+	return res
 }
