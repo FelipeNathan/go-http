@@ -52,8 +52,8 @@ func newExporter() *otlptrace.Exporter {
 	}
 }
 
-func TraceReq(ctx context.Context, req *http.Request) (context.Context, trace.Span) {
-	return otel.Tracer(internal.AppName).Start(ctx, fmt.Sprintf("[%s] %s", req.Method, req.RequestURI))
+func TraceReq(ctx context.Context, req *http.Request, attr ...attribute.KeyValue) (context.Context, trace.Span) {
+	return Trace(ctx, fmt.Sprintf("[%s] %s", req.Method, req.RequestURI))
 }
 
 func Trace(ctx context.Context, spanName string, attr ...attribute.KeyValue) (context.Context, trace.Span) {
