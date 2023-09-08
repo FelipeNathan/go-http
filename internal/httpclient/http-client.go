@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/FelipeNathan/go-http/httpclient/config"
-	"github.com/FelipeNathan/go-http/metric"
+	"github.com/FelipeNathan/go-http/internal/httpclient/config"
+	"github.com/FelipeNathan/go-http/internal/metric"
 )
 
 type HttpClient struct {
