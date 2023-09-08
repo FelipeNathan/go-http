@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"text/template"
@@ -19,7 +20,7 @@ type payload struct {
 
 func Index(w http.ResponseWriter, req *http.Request) {
 
-	_, span := jaeger.Trace(req.Context(), req)
+	_, span := jaeger.TraceReq(req.Context(), req)
 	defer span.End()
 
 	template, err := template.ParseFiles("./web/html/index.html")
@@ -33,7 +34,7 @@ func Index(w http.ResponseWriter, req *http.Request) {
 
 func Post(w http.ResponseWriter, req *http.Request) {
 
-	_, span := jaeger.Trace(req.Context(), req)
+	ctx, span := jaeger.TraceReq(req.Context(), req)
 	defer span.End()
 
 	p := &payload{}
@@ -43,13 +44,13 @@ func Post(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	response := makeRequest(*p)
+	response := makeRequest(ctx, *p)
 
 	w.Header().Add("Content-Type", "text/html")
 	template.HTMLEscape(w, []byte(response))
 }
 
-func makeRequest(p payload) string {
+func makeRequest(ctx context.Context, p payload) string {
 	client, err := httpclient.NewHttpClient(p.Insecure, CertPath)
 	if err != nil {
 		panic(err)
@@ -58,9 +59,9 @@ func makeRequest(p payload) string {
 	var res string
 	switch p.Method {
 	case "POST":
-		res = client.Post(p.Url)
+		res = client.Post(ctx, p.Url)
 	default:
-		res = client.Get(p.Url)
+		res = client.Get(ctx, p.Url)
 	}
 	return res
 }

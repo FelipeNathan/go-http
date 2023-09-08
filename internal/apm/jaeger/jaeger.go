@@ -7,6 +7,7 @@ import (
 
 	"github.com/FelipeNathan/go-http/internal"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -51,6 +52,10 @@ func newExporter() *otlptrace.Exporter {
 	}
 }
 
-func Trace(ctx context.Context, req *http.Request) (context.Context, trace.Span) {
+func TraceReq(ctx context.Context, req *http.Request) (context.Context, trace.Span) {
 	return otel.Tracer(internal.AppName).Start(ctx, fmt.Sprintf("[%s] %s", req.Method, req.RequestURI))
+}
+
+func Trace(ctx context.Context, spanName string, attr ...attribute.KeyValue) (context.Context, trace.Span) {
+	return otel.Tracer(internal.AppName).Start(ctx, spanName, trace.WithAttributes(attr...))
 }

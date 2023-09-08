@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"strings"
@@ -46,9 +47,9 @@ func makeRequest() string {
 	var res string
 	switch method {
 	case "POST":
-		res = client.Post(url)
+		res = client.Post(context.Background(), url)
 	default:
-		res = client.Get(url)
+		res = client.Get(context.Background(), url)
 	}
 	return res
 }
