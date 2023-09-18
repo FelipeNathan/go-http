@@ -3,3 +3,4 @@ certs/**/*
 !certs/*.crt
 !certs/*.csr
 !**/.gitkeep
+.idea
